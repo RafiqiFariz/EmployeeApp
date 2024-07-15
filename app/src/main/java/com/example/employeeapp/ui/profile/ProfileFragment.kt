@@ -53,14 +53,14 @@ class ProfileFragment : Fragment() {
                             getString(R.string.profile_birth, it.placeOfBirth, it.dateOfBirth)
                         binding.address.text = it.address
 
-//                        if (employee.photo.isEmpty()) {
-//                            Glide.with(this@ProfileFragment)
-//                                .load("https://ui-avatars.com/api/?name=${employee.name}")
-//                                .into(binding.profilePicture)
-//                        } else {
-//                            Glide.with(this@ProfileFragment).load(it.photo)
-//                                .into(binding.profilePicture)
-//                        }
+                        if (employee.photo.isEmpty()) {
+                            Glide.with(this@ProfileFragment)
+                                .load("https://ui-avatars.com/api/?name=${employee.name}")
+                                .into(binding.profilePicture)
+                        } else {
+                            Glide.with(this@ProfileFragment).load(it.photo)
+                                .into(binding.profilePicture)
+                        }
                     }
                 }
             }
