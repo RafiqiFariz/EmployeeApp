@@ -1,6 +1,7 @@
 package com.example.employeeapp.ui.profile
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +15,11 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.employeeapp.R
 import com.example.employeeapp.databinding.FragmentProfileBinding
-import com.example.persiapanujikom.data.Employee
+import com.example.employeeapp.data.Employee
 import kotlinx.coroutines.launch
 
 /**
- * A simple [Fragment] subclass as the default destination in the navigation.
+ * Fragment untuk menampilkan halaman profile karyawan
  */
 class ProfileFragment : Fragment() {
 
@@ -72,7 +73,12 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private suspend fun createEmployeeIfNotExist(employee: Employee?) {
+    /**
+     * Fungsi untuk membuat data employee jika tidak ada di database
+     *
+     * @param employee data class Employee
+     */
+    suspend fun createEmployeeIfNotExist(employee: Employee?) {
         if (employee == null) {
             // Insert dummy employee if not found
             val dummyEmployee = Employee(

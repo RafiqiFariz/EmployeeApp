@@ -1,12 +1,12 @@
 package com.example.employeeapp.ui.profile.edit
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.core.widget.doOnTextChanged
@@ -19,11 +19,11 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.employeeapp.R
 import com.example.employeeapp.databinding.FragmentEditProfileBinding
-import com.example.persiapanujikom.data.Employee
+import com.example.employeeapp.data.Employee
 import kotlinx.coroutines.launch
 
 /**
- * A simple [Fragment] subclass as the second destination in the navigation.
+ * Fragment untuk menampilkan halaman edit profile
  */
 class EditProfileFragment : Fragment() {
 
@@ -31,6 +31,7 @@ class EditProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: EditProfileViewModel by viewModels()
     private var selectedImageUri: Uri? = null
+    private var employeeData: Employee? = null
 
     private val pickImage = registerForActivityResult(PickVisualMedia()) { uri ->
         if (uri != null) {
@@ -54,12 +55,16 @@ class EditProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Mengambil ID karyawan dari argumen
         val employeeId = arguments?.getInt("employeeId") ?: 0
 
+        // Melakukan inisialisasi dalam coroutine
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.show(employeeId).collect { employee ->
+                    employeeData = employee
 
+                    // Menampilkan data karyawan ke elemen UI
                     employee?.let {
                         binding.editName.setText(it.name)
                         binding.editNip.setText(it.nip)
@@ -77,6 +82,7 @@ class EditProfileFragment : Fragment() {
                             .into(binding.imageProfile)
                     }
 
+                    // Menampilkan avatar default jika tidak ada foto karyawan
                     if (employee?.photo?.isBlank() == true) {
                         Glide.with(this@EditProfileFragment)
                             .load("https://ui-avatars.com/api/?name=${employee.name}")
@@ -86,13 +92,16 @@ class EditProfileFragment : Fragment() {
             }
         }
 
+        // Menangani klik tombol pilih gambar
         binding.btnChooseImage.setOnClickListener {
             val mimeType = "image/*"
             pickImage.launch(PickVisualMediaRequest(PickVisualMedia.SingleMimeType(mimeType)))
         }
 
+        // Validasi input pengguna
         validateInput()
 
+        // Menangani klik tombol simpan
         binding.btnSave.setOnClickListener {
             updateEmployee()
 
@@ -100,12 +109,16 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Fungsi untuk melakukan validasi input dan memunculkan error jika tidak
+     * memenuhi rules yang telah ditentukan
+     */
     private fun validateInput() {
         binding.editName.doOnTextChanged { text, _, _, _ ->
             binding.editName.error = if (text.isNullOrBlank()) {
                 "Name is required"
             } else {
-                null // Clear error if valid
+                null
             }
         }
 
@@ -126,6 +139,13 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Fungsi untuk memperbarui data karyawan
+     *
+     * Fungsi ini mengambil data yang dimasukkan oleh pengguna dari berbagai elemen UI,
+     * membuat objek `Employee` baru dengan data tersebut, dan kemudian memanggil
+     * metode `update` dari `viewModel` untuk memperbarui data karyawan di database.
+     */
     private fun updateEmployee() {
         val updatedName = binding.editName.text.toString()
         val updatedNip = binding.editNip.text.toString()
@@ -137,6 +157,11 @@ class EditProfileFragment : Fragment() {
         val (updatedPlaceOfBirth, updatedDateOfBirth) = updatedBirth.split(", ", limit = 2)
 
         val employeeId = arguments?.getInt("employeeId") ?: 0
+        val selectedPhoto = when {
+            selectedImageUri != null -> selectedImageUri.toString()
+            employeeData?.photo?.isNotEmpty() == true -> employeeData?.photo
+            else -> "https://ui-avatars.com/api/?name=${employeeData?.name}"
+        }
 
         val updatedEmployee = Employee(
             id = employeeId,
@@ -146,11 +171,12 @@ class EditProfileFragment : Fragment() {
             dateOfBirth = updatedDateOfBirth,
             placeOfBirth = updatedPlaceOfBirth,
             address = updatedAddress,
-            photo = selectedImageUri.toString()
+            photo = selectedPhoto.toString()
         )
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.update(updatedEmployee)
+            Toast.makeText(requireContext(), "Data berhasil diperbarui", Toast.LENGTH_SHORT).show()
         }
     }
 

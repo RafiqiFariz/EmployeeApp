@@ -6,9 +6,18 @@
     app:startDestination="@id/ProfileFragment">
 
     <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.employeeapp.ui.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+    </fragment>
+    <fragment
         android:id="@+id/ProfileFragment"
         android:name="com.example.employeeapp.ui.profile.ProfileFragment"
-        android:label="@string/first_fragment_label"
+        android:label="@string/profile_fragment_label"
         tools:layout="@layout/fragment_profile">
 
         <action
@@ -18,7 +27,7 @@
     <fragment
         android:id="@+id/EditProfileFragment"
         android:name="com.example.employeeapp.ui.profile.edit.EditProfileFragment"
-        android:label="@string/second_fragment_label"
+        android:label="@string/edit_profile_fragment_label"
         tools:layout="@layout/fragment_edit_profile">
 
         <action
